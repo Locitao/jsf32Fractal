@@ -128,6 +128,21 @@ public class Main extends Application {
             drawAllEdges();
         });
 
+        btnBinaryNoBuffer.setOnMouseClicked(event -> {
+            int i = Integer.parseInt(nrOfEdges.getText());
+            currentLevel = i;
+            clearKochPanel();
+            createKochFractal(i);
+            double x = 0;
+            try {
+                x = saveBinaryFileNoBuffer();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            speed.setText(String.valueOf(x / 1000000));
+            drawAllEdges();
+        });
+
     }
 
     /**
@@ -378,9 +393,35 @@ public class Main extends Application {
         return time = System.nanoTime() - time;
     }
 
-    public void saveBinaryFileNoBuffer()
-    {
-
+    public double saveBinaryFileNoBuffer() throws IOException {
+        double time = System.nanoTime();
+        File file = new File("C:\\Users\\rvanduijnhoven\\Documents\\jsfoutput\\binFileWithoutBuffer.bin");
+        DataOutputStream outPut = null;
+        DataInputStream inPut = null;
+        FileOutputStream fileOut = null;
+        FileInputStream fileIn = null;
+        try {
+            fileOut = new FileOutputStream(file);
+            outPut = new DataOutputStream(fileOut);
+            for(Edge e : edges)
+            {
+                outPut.writeDouble(e.X1);
+                outPut.writeDouble(e.Y1);
+                outPut.writeDouble(e.X2);
+                outPut.writeDouble(e.Y2);
+                outPut.writeDouble(e.color.getRed());
+                outPut.writeDouble(e.color.getGreen());
+                outPut.writeDouble(e.color.getBlue());
+                outPut.flush();
+            }
+            outPut.close();
+        } catch (Exception ex)
+        {
+            ex.printStackTrace();
+        }
+        edges.clear();
+        //Now read every edge from the file and draw it.
+        return time - System.nanoTime();
     }
 
     public void saveBinaryFileWithBuffer()
