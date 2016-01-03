@@ -108,7 +108,7 @@ public class Main extends Application {
                 e.printStackTrace();
             }
             speed.setText(String.valueOf((x / 1000000)));
-            drawAllEdges();
+            //drawAllEdges();
         });
 
         btnTextWithBuffer.setOnMouseClicked(event -> {
@@ -125,7 +125,7 @@ public class Main extends Application {
                 ex.printStackTrace();
             }
             speed.setText(String.valueOf(x / 1000000));
-            drawAllEdges();
+            //drawAllEdges();
         });
 
         btnBinaryNoBuffer.setOnMouseClicked(event -> {
@@ -140,7 +140,21 @@ public class Main extends Application {
                 e.printStackTrace();
             }
             speed.setText(String.valueOf(x / 1000000));
-            drawAllEdges();
+            //drawAllEdges();
+        });
+
+        btnBinaryWithBuffer.setOnMouseClicked(event ->{
+            int i = Integer.parseInt(nrOfEdges.getText());
+            currentLevel = i;
+            clearKochPanel();
+            createKochFractal(i);
+            double x = 0;
+            try {
+                x = saveBinaryFileWithBuffer();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            speed.setText(String.valueOf(x / 1000000));
         });
 
     }
@@ -276,7 +290,7 @@ public class Main extends Application {
 
                         Color c = new Color(red, green, blue, 1);
                         Edge e = new Edge(X1, Y1, X2, Y2, c);
-                        edges.add(e);
+                        drawEdge(e);
                     }
 
                 }
@@ -378,7 +392,7 @@ public class Main extends Application {
 
                         Color c = new Color(red, green, blue, 1);
                         Edge e = new Edge(X1, Y1, X2, Y2, c);
-                        edges.add(e);
+                        drawEdge(e);
                     }
 
                 }
@@ -421,12 +435,91 @@ public class Main extends Application {
         }
         edges.clear();
         //Now read every edge from the file and draw it.
-        return time - System.nanoTime();
+        try {
+            fileIn = new FileInputStream(file);
+            inPut = new DataInputStream(fileIn);
+
+            if (inPut.available() > 0)
+            {
+                while (inPut.available() > 0)
+                {
+                    double X1 = inPut.readDouble();
+                    double Y1 = inPut.readDouble();
+                    double X2 = inPut.readDouble();
+                    double Y2 = inPut.readDouble();
+                    double red = inPut.readDouble();
+                    double green = inPut.readDouble();
+                    double blue = inPut.readDouble();
+
+                    Edge e = new Edge(X1, Y1, X2, Y2, new Color(red, green, blue, 1));
+                    drawEdge(e);
+                }
+            }
+        } catch (Exception ex)
+        {
+            ex.printStackTrace();
+        }
+        return System.nanoTime() - time;
     }
 
-    public void saveBinaryFileWithBuffer()
+    public double saveBinaryFileWithBuffer()
     {
+        double time = System.nanoTime();
+        File file = new File("C:\\Users\\rvanduijnhoven\\Documents\\jsfoutput\\binFileWithBuffer.bin");
+        DataOutputStream outPut = null;
+        DataInputStream inPut = null;
+        FileOutputStream fileOut = null;
+        FileInputStream fileIn = null;
+        BufferedInputStream buffInput = null;
+        BufferedOutputStream buffOut = null;
+        try {
+            fileOut = new FileOutputStream(file);
+            buffOut = new BufferedOutputStream(fileOut);
+            outPut = new DataOutputStream(buffOut);
+            for(Edge e : edges)
+            {
+                outPut.writeDouble(e.X1);
+                outPut.writeDouble(e.Y1);
+                outPut.writeDouble(e.X2);
+                outPut.writeDouble(e.Y2);
+                outPut.writeDouble(e.color.getRed());
+                outPut.writeDouble(e.color.getGreen());
+                outPut.writeDouble(e.color.getBlue());
+                outPut.flush();
+            }
+            outPut.close();
+        } catch (Exception ex)
+        {
+            ex.printStackTrace();
+        }
+        edges.clear();
+        //Now read every edge from the file and draw it.
+        try {
+            fileIn = new FileInputStream(file);
+            buffInput = new BufferedInputStream(fileIn);
+            inPut = new DataInputStream(buffInput);
 
+            if (inPut.available() > 0)
+            {
+                while (inPut.available() > 0)
+                {
+                    double X1 = inPut.readDouble();
+                    double Y1 = inPut.readDouble();
+                    double X2 = inPut.readDouble();
+                    double Y2 = inPut.readDouble();
+                    double red = inPut.readDouble();
+                    double green = inPut.readDouble();
+                    double blue = inPut.readDouble();
+
+                    Edge e = new Edge(X1, Y1, X2, Y2, new Color(red, green, blue, 1));
+                    drawEdge(e);
+                }
+            }
+        } catch (Exception ex)
+        {
+            ex.printStackTrace();
+        }
+        return System.nanoTime() - time;
     }
 
     /**
